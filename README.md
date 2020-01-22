@@ -30,4 +30,4 @@ mydata_prl = dplyr::bind_rows(mydata_prl)
 
 ## summarise
 
-as you please, mine attempts are in the `user.R` file
+as you please, my attempts are in the `user.R` file

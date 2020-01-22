@@ -19,7 +19,7 @@ mydata <- import(c("~/data/file1","~/data/file2"))
 filter by a msn and return list
 
 ```{r}
-mydata_prl <- filtermsn(dBig, "RAT_PRL_80_20_vPele_5s_ITI")
+mydata_prl <- filtermsn(mydata, "RAT_PRL_80_20_vPele_5s_ITI")
 ```
 and then it's better to make it a data frame
 

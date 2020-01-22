@@ -1,5 +1,8 @@
 # usage
 
+## load functions
+first run the whole `function.R` file
+
 ## import data
 
 choose from a directory

@@ -50,23 +50,46 @@ dITI <- filtermsn(dBig, "RAT_PRL_80_20_vPele_5s_ITI") %>%
 library(dplyr)
 
 # summary
-summary <- dITI %>%
+summary <- 
+dITI %>%
   mutate(
     correct = ifelse(!is.na(choice) & choice == correctlever, 1, 0),
     time = as.POSIXct(paste0(startDate, startTime, sep = ' '), 
                       format="%m/%d/%y %H:%M:%S")) %>%
-  group_by(subject) %>%
+  group_by(subject, time) %>%
   arrange(time, trial, .by_group = TRUE) %>%
-  mutate(
-    stay = ifelse(choice == lead(choice), 1, 0)) %>% #omission?
-  ungroup() %>%
-  group_by(subject, startDate = deblank(startDate)) %>%
-  summarise(
-    nNAstay = length(which(is.na(stay))),
+    summarise(
     trials = length(unique(trial)),
     `%correct` = sum(correct, na.rm = T)/trials, #omission as 'incorrect'
     rewards = sum(reward, na.rm = T),
     omissions = length(choice[choice %in% -1]),
-    reverals = length(which(lag(correctlever) != correctlever)))
-
+    reverals = length(which(lag(correctlever) != correctlever))) %>%
+  arrange(time, .by_group = T) %>%
+  mutate(session = as.numeric(as.factor(time))) %>%
+  ungroup()
+  
 View(summary)
+
+
+# battle field ------------------------------------------------------------
+
+sample <- dITI %>% filter(subject == 3 & startDate == " 12/04/19")
+sample <- head(sample, 12)
+sample$choice[c(6,10)] <- -1
+
+(function(a){
+prevchoice = NA
+for(i in 1:nrow(a)){
+  choice = a$choice[i]
+  stay = NA
+  if(choice != -1){
+    stay = ifelse(choice == prevchoice, 1, 0)
+    prevchoice = choice}
+  a$stay[i] = stay}
+a})(sample)
+
+sample$won <- lag(sample$reward) # poprzedni
+
+(function(input, value){
+  lapply(input, function(l){
+    if(unique(l$subject) %in% value){l}})})(dBig, 40)

@@ -180,3 +180,27 @@ import <- function(my_dirs = NULL, print = T){
     if(print){print(i)}
     output <- append(output, wrap(i))}
   output}
+
+# analysis ----------------------------------------------------------------
+
+assignStay_ <- function(a){
+  prevchoice = NA
+  for(i in 1:nrow(a)){
+    choice = a$choice[i]
+    stay = NA
+    if(choice != -1){
+      stay = ifelse(choice == prevchoice, 1, 0)
+      prevchoice = choice}
+    a$stay[i] = stay}
+  a}
+
+assignStay <- function(a){
+  output = list()
+  i = 0
+  for(s in unique(a$subject)){
+    a_subject = subset(a, subject == s)
+    for(t in unique(a_subject$time)){
+      a_ses = subset(a_subject, time == t)
+      a_ses = a_ses[order(a_ses$trial),]
+      output[[(i = i + 1)]] = assignStay_(a_ses)}}
+  do.call(rbind, output)}

@@ -165,8 +165,7 @@ import <- function(my_dirs = NULL, print = T, ...){
     output <- append(output, wrap(input = i, ...))}
   output}
 
-# analysis ----------------------------------------------------------------
-
+# stay behaviour ----------------------------------------------------------
 assignStay_ <- function(a){
   prevchoice = NA
   for(i in 1:nrow(a)){
@@ -189,9 +188,8 @@ assignStay <- function(a){
       output[[(i = i + 1)]] = assignStay_(a_ses)}}
   do.call(rbind, output)}
 
-# summary -----------------------------------------------------------------
-
-createsummary <- function(input = dITI){
+# analysis ----------------------------------------------------------------
+createsummary <- function(input){
   
   temp <- input %>%
     mutate(
@@ -207,7 +205,6 @@ createsummary <- function(input = dITI){
     ungroup()
   
   summary <- list(
-    
     # all data
     brief = temp %>%
       group_by(subject, time) %>%
@@ -227,7 +224,6 @@ createsummary <- function(input = dITI){
         reverals = 
           length(which(lag(correctlever) != correctlever))) %>%
       ungroup(),
-    
     # without omissions
     specific = temp %>%
       filter(choice != -1) %>% #remove all omissions
@@ -257,10 +253,9 @@ createsummary <- function(input = dITI){
           mean(latency[correct == 0], na.rm = T)) %>%
       ungroup())
   
-  full_join(summary$brief, summary$specific, by = c("subject", "time"))}
+  dplyr::full_join(summary$brief, summary$specific, by = c("subject", "time"))}
 
 # save result -------------------------------------------------------------
-
 savegently <- function(whatto = createsummary()){
   temp <- menu(c("Yes", "No"), title="Do you want to save created summary to a file?")
   if(temp == 1){
@@ -275,30 +270,24 @@ savegently <- function(whatto = createsummary()){
 # load dependencies
 if (!require('dplyr')) install.packages('dplyr'); library('dplyr')
 
-# load custom functions
-#source("R/function.R")
-
 # import the datasets
-#   returns a list of data frames
 my_data <- import()
 
 # filters by msn and transforms to data frame
 data_prl <- filtermsn(my_data, "RAT_PRL_80_20_vPele_5s_ITI") %>%
   dplyr::bind_rows(.id = "sessionfile")
 
-# run a summary
-summary <- createsummary(dITI)
-
-# message
 cat("\n")
-message("Summary created:")
-# print the summary
+message("data stored in 'data_prl'")
+
+# make a summary
+summary <- createsummary(data_prl)
+
+cat("\n")
+message("created summary: (stored in 'summary')")
+cat("\n")
 print(summary)
-
-# save results to a file
 cat("\n")
+
+# save to a file
 savegently(summary)
-
-# inform
-cat("\n")
-message("To see processed data type 'data_prl'")
